@@ -7,28 +7,38 @@ function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
+  // backend URL here
+  const API_URL = 'http://localhost:3001';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
-      const response = await fetch('/login', {
+      const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', 
-        body: JSON.stringify({ username, pass: password }),
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ username, pass: password }), // match backend field names
       });
 
-      const data = await response.json();
+      // parse JSON, handle non-JSON responses
+      let data;
+      try {
+        data = await response.json();
+      } catch (err) {
+        console.error('Failed to parse JSON:', err);
+        setError('Unexpected server response.');
+        return;
+      }
 
       if (response.ok) {
-        navigate('/dashboard'); // redirect to dashboard after login
+        // Login succeeded
+        navigate('/dashboard'); //redirect to dashboard
       } else {
         setError(data.error || 'Login failed.');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Network error:', err);
       setError('An error occurred. Please try again.');
     }
   };

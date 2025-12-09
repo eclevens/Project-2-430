@@ -4,6 +4,7 @@ const { Account } = models;
 
 // login
 const login = (req, res) => {
+  console.log('req.body:', req.body);
   const username = `${req.body.username}`;
   const pass = `${req.body.pass}`;
 
