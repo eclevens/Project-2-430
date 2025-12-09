@@ -34,7 +34,7 @@ const upsertCollage = async (req, res) => {
       collage = await Collage.findOneAndUpdate(
         { _id, owner: req.session.account._id },
         { collageName, images },
-        { new: true }
+        { new: true },
       );
 
       if (!collage) {
@@ -42,16 +42,15 @@ const upsertCollage = async (req, res) => {
       }
 
       return res.status(200).json({ success: true, collage });
-    } else {
-      // Create new collage
-      collage = new Collage({
-        collageName,
-        images,
-        owner: req.session.account._id,
-      });
-      await collage.save();
-      return res.status(201).json({ success: true, collage });
     }
+    // Create new collage
+    collage = new Collage({
+      collageName,
+      images,
+      owner: req.session.account._id,
+    });
+    await collage.save();
+    return res.status(201).json({ success: true, collage });
   } catch (err) {
     console.error('Error saving collage:', err);
     if (err.code === 11000) {

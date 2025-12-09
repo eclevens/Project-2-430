@@ -61,7 +61,7 @@ const logout = (req, res) => {
 // change pass
 const changePassword = async (req, res) => {
   // Use session username
-  const username = req.session?.account?.username;
+  const username = req.session && req.session.account ? req.session.account.username : null;
   const { oldPassword, newPassword } = req.body;
 
   if (!username || !oldPassword || !newPassword) {
