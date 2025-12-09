@@ -2,52 +2,68 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Login() {
+  // Form state
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const navigate = useNavigate();
 
-  // backend URL here
-  const API_URL = 'http://localhost:3001';
+  // Feedback state
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const navigate = useNavigate();
+  const API_URL = 'http://localhost:3001'; // backend URL
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!username || !password) {
+      setError('Please enter both username and password.');
+      return;
+    }
+
+    setIsLoading(true);
+    setError('');
 
     try {
       const response = await fetch(`${API_URL}/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        credentials: 'include', // include
         body: JSON.stringify({ username, pass: password }), // match backend field names
       });
 
-      // parse JSON, handle non-JSON responses
       let data;
       try {
         data = await response.json();
       } catch (err) {
         console.error('Failed to parse JSON:', err);
         setError('Unexpected server response.');
+        setIsLoading(false);
         return;
       }
 
       if (response.ok) {
-        // Login succeeded
-        navigate('/dashboard'); //redirect to dashboard
+        // Login succeeded, redirect to dashboard
+        navigate('/dashboard');
       } else {
         setError(data.error || 'Login failed.');
       }
     } catch (err) {
       console.error('Network error:', err);
       setError('An error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <div className="login-container">
       <h2>Login</h2>
+      {/* Feedback message */}
       {error && <p style={{ color: 'red' }}>{error}</p>}
+
       <form onSubmit={handleSubmit}>
+        {/* Username input */}
         <div>
           <label>Username:</label>
           <input
@@ -57,6 +73,8 @@ function Login() {
             required
           />
         </div>
+
+        {/* Password input */}
         <div>
           <label>Password:</label>
           <input
@@ -66,7 +84,11 @@ function Login() {
             required
           />
         </div>
-        <button type="submit">Login</button>
+
+        {/* Submit button */}
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? 'Logging in...' : 'Login'}
+        </button>
       </form>
     </div>
   );

@@ -2,11 +2,11 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.jsx',  // your React entry point
+  entry: './src/index.jsx', 
   output: {
-    path: path.resolve(__dirname, 'hosted'),  // output folder
+    path: path.resolve(__dirname, 'hosted'),
     filename: '[name].bundle.js',
-    publicPath: '/', // important for React Router and favicon
+    publicPath: '/',
     clean: true,
   },
   module: {
@@ -24,7 +24,7 @@ module.exports = {
         test: /\.(png|jpe?g|gif|svg|ico)$/i,
         type: 'asset/resource',
         generator: {
-          filename: 'img/[name][hash][ext][query]', // output images to hosted/img/
+          filename: 'img/[name][hash][ext][query]',
         },
       },
     ],
@@ -37,7 +37,7 @@ module.exports = {
   ],
   devServer: {
     static: {
-      directory: path.resolve(__dirname, 'hosted'), // serve hosted/ as static folder
+      directory: path.resolve(__dirname, 'hosted'),
     },
     port: 3000,
     hot: true,

@@ -65,7 +65,7 @@ if (process.env.NODE_ENV === 'production') {
 const startServer = async () => {
   try {
     // MongoDB
-    const dbURI = process.env.MONGODB_URI || 'mongodb://localhost/DomoMaker';
+    const dbURI = process.env.MONGODB_URI || 'mongodb://localhost/DomoMaker'; //mongodb is called domo but i am not using domo code. I had so many issues I resued the domo here but there is no domo code. 
     await mongoose.connect(dbURI);
     console.log('MongoDB connected');
 

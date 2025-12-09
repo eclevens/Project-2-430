@@ -3,59 +3,27 @@ const mid = require('./middleware');
 
 const router = (app) => {
   // login
-  app.post('/login', mid.requiresLogout, async (req, res) => {
-    try {
-      const result = await controllers.Account.login(req.body); // expects { username, password }
-      res.json(result);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  });
+  app.post('/login', mid.requiresLogout, controllers.Account.login);
 
   // signup
-  app.post('/signup', mid.requiresLogout, async (req, res) => {
-    try {
-      const result = await controllers.Account.signup(req.body); // expects { username, password, ... }
-      res.json(result);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  });
+  app.post('/signup', mid.requiresLogout, controllers.Account.signup);
 
   // logout
-  app.post('/logout', mid.requiresLogin, (req, res) => {
-    controllers.Account.logout(req, res);
-    res.json({ success: true });
-  });
+  app.post('/logout', mid.requiresLogin, controllers.Account.logout);
 
-  // password change
-  app.post('/newpassword', mid.requiresLogin, async (req, res) => {
-    try {
-      const result = await controllers.Account.changePassword(req.body); // expects { username, oldPassword, newPassword }
-      res.json(result);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  });
+  // change password
+  app.post('/newpassword', mid.requiresLogin, controllers.Account.changePassword);
 
-  // collage maker (domo for now)
-  app.get('/maker', mid.requiresLogin, async (req, res) => {
-    try {
-      const domos = await controllers.Domo.getDomos(req.session.account._id);
-      res.json({ domos });
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  });
+  // collage maker!
 
-  app.post('/maker', mid.requiresLogin, async (req, res) => {
-    try {
-      const domo = await controllers.Domo.makeDomo(req.body, req.session.account._id);
-      res.json(domo);
-    } catch (err) {
-      res.status(400).json({ error: err.message });
-    }
-  });
+  // get all collages for logged-in user
+  app.get('/maker', mid.requiresLogin, controllers.Collage.getCollages);
+
+  // create or update a collage
+  app.post('/maker', mid.requiresLogin, controllers.Collage.upsertCollage);
+
+  // delete a collage by ID
+  app.delete('/maker/:id', mid.requiresLogin, controllers.Collage.deleteCollage);
 };
 
 module.exports = router;

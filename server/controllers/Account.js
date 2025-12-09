@@ -4,6 +4,11 @@ const { Account } = models;
 
 // login
 const login = (req, res) => {
+
+  console.log('--- LOGIN REQUEST RECEIVED ---');
+  console.log('Headers:', req.headers);
+  console.log('Body:', req.body);
+
   console.log('req.body:', req.body);
   const username = `${req.body.username}`;
   const pass = `${req.body.pass}`;

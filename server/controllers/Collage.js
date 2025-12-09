@@ -1,44 +1,92 @@
-const models = require('../models');
-const { Collage } = models;
+// server/controllers/Collage.js
+const Collage = require('../models/Collage');
 
+// get collages
 const getCollages = async (req, res) => {
   try {
-    const query = { owner: req.session.account._id };
-    const collages = await Collage.find(query).lean().exec();
+    if (!req.session.account || !req.session.account._id) {
+      return res.status(401).json({ error: 'Not authorized' });
+    }
+
+    const collages = await Collage.find({ owner: req.session.account._id })
+      .lean()
+      .exec();
+
     return res.json({ success: true, collages });
   } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Error retrieving collages!' });
+    console.error('Error retrieving collages:', err);
+    return res.status(500).json({ error: 'Error retrieving collages' });
   }
 };
 
-const createCollage = async (req, res) => {
-  const { title, images, layout } = req.body;
-  if (!title || !images) {
-    return res.status(400).json({ error: 'Title and images are required' });
+// Create or update a collage
+const upsertCollage = async (req, res) => {
+  const { _id, collageName, images } = req.body;
+
+  if (!req.session.account || !req.session.account._id) {
+    return res.status(401).json({ error: 'Not authorized' });
   }
 
-  const collageData = {
-    title,
-    images,
-    layout,
-    owner: req.session.account._id,
-  };
+  if (!collageName || !images || !Array.isArray(images)) {
+    return res.status(400).json({ error: 'Collage name and images are required' });
+  }
 
   try {
-    const newCollage = new Collage(collageData);
-    await newCollage.save();
-    return res.json({ success: true, collage: newCollage });
-  } catch (err) {
-    console.error(err);
-    if (err.code === 11000) {
-      return res.status(400).json({ error: 'Collage already exists' });
+    let collage;
+    if (_id) {
+      // update existing collage
+      collage = await Collage.findOneAndUpdate(
+        { _id, owner: req.session.account._id },
+        { collageName, images },
+        { new: true } // return updated document
+      );
+      if (!collage) {
+        return res.status(404).json({ error: 'Collage not found' });
+      }
+    } else {
+      // create new collage
+      collage = new Collage({
+        collageName,
+        images,
+        owner: req.session.account._id,
+      });
+      await collage.save();
     }
-    return res.status(500).json({ error: 'Error creating collage' });
+
+    return res.json({ success: true, collage });
+  } catch (err) {
+    console.error('Error saving collage:', err);
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Collage with this name already exists' });
+    }
+    return res.status(500).json({ error: 'Error saving collage' });
+  }
+};
+
+// delete a collage by ID
+const deleteCollage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!req.session.account || !req.session.account._id) {
+      return res.status(401).json({ error: 'Not authorized' });
+    }
+
+    const result = await Collage.deleteOne({ _id: id, owner: req.session.account._id });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Collage not found' });
+    }
+
+    return res.json({ success: true });
+  } catch (err) {
+    console.error('Error deleting collage:', err);
+    return res.status(500).json({ error: 'Error deleting collage' });
   }
 };
 
 module.exports = {
   getCollages,
-  createCollage,
+  upsertCollage,
+  deleteCollage,
 };
