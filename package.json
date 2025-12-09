@@ -1,18 +1,14 @@
 {
-  "name": "domomaker",
+  "name": "collagemaker",
   "version": "1.0.0",
-  "description": "A Simple Login Example using Node.js, Mongo and Redis",
+  "description": "A program that allows users to create collages online",
   "main": "./server/app.js",
   "scripts": {
-    "webpack": "webpack",
-    "webpackWatch": "webpack watch",
-    "nodemon": "nodemon -e js,html,css --watch ./server --watch ./hosted ./server/app.js",
-    "start": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "node ./server/app.js",
+    "start": "node server/app.js",
+    "server": "node server/app.js",
     "client": "npm start --prefix client",
-    "pretest": "eslint ./server --fix",
-    "test": "echo \"Tests complete\"",
-    "heroku-postbuild": "webpack"
+    "heroku-postbuild": "npm install --prefix client && npm run build --prefix client",
+    "test": "echo \"Tests complete\""
   },
   "keywords": [
     "Node",
@@ -20,7 +16,7 @@
     "Redis",
     "Login"
   ],
-  "author": "Cody Van De Mark / Austin Willoughby",
+  "author": "Ella Clevens",
   "license": "Apache 2.0",
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -45,18 +41,10 @@
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
     "babel-loader": "^10.0.0",
-    "concurrently": "^8.2.2",
     "cross-env": "^10.1.0",
-    "css-loader": "^7.1.2",
-    "dotenv-webpack": "^8.1.1",
     "eslint": "^8.57.1",
-    "eslint-config-airbnb": "^19.0.4",
-    "eslint-plugin-import": "^2.32.0",
-    "file-loader": "^6.2.0",
-    "html-webpack-plugin": "^5.6.5",
     "nodemon": "^3.1.10",
     "rimraf": "^6.1.2",
-    "style-loader": "^4.0.0",
     "webpack": "^5.103.0",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
