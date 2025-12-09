@@ -1,15 +1,16 @@
+// client/webpack.config.js
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 const isProd = process.env.NODE_ENV === 'production';
 
 module.exports = {
-  entry: path.resolve(__dirname, 'client', 'src', 'index.js'),
+  entry: path.resolve(__dirname, 'src', 'index.js'),
 
   output: {
-    path: path.resolve(__dirname, 'client', 'dist'),
+    path: path.resolve(__dirname, 'dist'),
     filename: isProd ? '[name].[contenthash].bundle.js' : '[name].bundle.js',
-    publicPath: '/', // important for react-router
+    publicPath: '/', // important if you use React Router
     clean: true,
   },
 
@@ -24,13 +25,13 @@ module.exports = {
         use: 'babel-loader',
       },
 
-      // CSS imports
+      // CSS
       {
         test: /\.css$/i,
         use: ['style-loader', 'css-loader'],
       },
 
-      // Images & assets
+      // Images & fonts
       {
         test: /\.(png|jpe?g|gif|svg|webp|ico)$/i,
         type: 'asset/resource',
@@ -38,8 +39,6 @@ module.exports = {
           filename: 'assets/images/[name][hash][ext][query]',
         },
       },
-
-      // Fonts
       {
         test: /\.(woff2?|eot|ttf|otf)$/i,
         type: 'asset/resource',
@@ -53,13 +52,14 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.jsx'],
     alias: {
-      '@': path.resolve(__dirname, 'client', 'src'),
+      // convenience: import X from '@/components/X'
+      '@': path.resolve(__dirname, 'src'),
     },
   },
 
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, 'client', 'public', 'index.html'),
+      template: path.resolve(__dirname, 'public', 'index.html'),
       filename: 'index.html',
       inject: 'body',
     }),
@@ -67,15 +67,13 @@ module.exports = {
 
   devServer: {
     static: {
-      directory: path.resolve(__dirname, 'client', 'public'),
+      directory: path.resolve(__dirname, 'public'),
     },
     port: 3000,
     hot: true,
     open: true,
     historyApiFallback: true,
-    client: {
-      overlay: true,
-    },
+    client: { overlay: true },
   },
 
   watchOptions: {
