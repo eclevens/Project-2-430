@@ -4,12 +4,6 @@ const { Account } = models;
 
 // login
 const login = (req, res) => {
-
-  console.log('--- LOGIN REQUEST RECEIVED ---');
-  console.log('Headers:', req.headers);
-  console.log('Body:', req.body);
-
-  console.log('req.body:', req.body);
   const username = `${req.body.username}`;
   const pass = `${req.body.pass}`;
 
@@ -50,7 +44,7 @@ const signup = async (req, res) => {
     req.session.account = Account.toAPI(newAccount);
     return res.json({ success: true, redirect: '/dashboard' });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     if (err.code === 11000) {
       return res.status(400).json({ error: 'Username is already in use!' });
     }
@@ -64,12 +58,20 @@ const logout = (req, res) => {
   return res.json({ success: true });
 };
 
-// change password
+// change pass
 const changePassword = async (req, res) => {
-  const { username, oldPassword, newPassword } = req.body;
+  // Use session username
+  const username = req.session?.account?.username;
+  const { oldPassword, newPassword } = req.body;
 
   if (!username || !oldPassword || !newPassword) {
     return res.status(400).json({ error: 'All fields are required!' });
+  }
+
+  if (oldPassword === newPassword) {
+    return res
+      .status(400)
+      .json({ error: 'New password must be different from old password.' });
   }
 
   try {
@@ -78,16 +80,19 @@ const changePassword = async (req, res) => {
       return res.status(404).json({ error: 'User not found' });
     }
 
-    const isValid = await Account.authenticate(username, oldPassword, (err, user) => {
-      if (err || !user) return false;
-      return true;
+    // Wrap callback-based authenticate in a Promise
+    const isValid = await new Promise((resolve) => {
+      Account.authenticate(username, oldPassword, (err, user) => {
+        if (err || !user) return resolve(false);
+        return resolve(true);
+      });
     });
 
     if (!isValid) {
       return res.status(401).json({ error: 'Old password is incorrect' });
     }
 
-    //hsh the new password
+    // Hash and save new password
     const hash = await Account.generateHash(newPassword);
     account.password = hash;
     await account.save();
@@ -95,7 +100,9 @@ const changePassword = async (req, res) => {
     return res.json({ success: true, message: 'Password changed successfully!' });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'An error occurred while changing password' });
+    return res
+      .status(500)
+      .json({ error: 'An error occurred while changing password' });
   }
 };
 

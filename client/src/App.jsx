@@ -4,6 +4,7 @@ import Login from './Login.jsx';
 import Signup from './Signup.jsx';
 import NewPassword from './NewPassword.jsx';
 import Dashboard from './Dashboard.jsx';
+import NotFound from './404.jsx'; // import new 404 page
 
 function App() {
   return (
@@ -13,7 +14,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/newpassword" element={<NewPassword />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="*" element={<Login />} /> {/* fallback route */}
+        <Route path="*" element={<NotFound />} /> {/* fallback route */}
       </Routes>
     </Router>
   );

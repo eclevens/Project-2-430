@@ -1,31 +1,27 @@
-// server/controllers/Collage.js
 const Collage = require('../models/Collage');
 
-// get collages
+// Get all collages for logged-in user
 const getCollages = async (req, res) => {
+  if (!req.session.account || !req.session.account._id) {
+    return res.status(401).json({ error: 'Not authorized' });
+  }
+
   try {
-    if (!req.session.account || !req.session.account._id) {
-      return res.status(401).json({ error: 'Not authorized' });
-    }
-
-    const collages = await Collage.find({ owner: req.session.account._id })
-      .lean()
-      .exec();
-
-    return res.json({ success: true, collages });
+    const collages = await Collage.find({ owner: req.session.account._id }).lean().exec();
+    return res.status(200).json({ success: true, collages });
   } catch (err) {
     console.error('Error retrieving collages:', err);
-    return res.status(500).json({ error: 'Error retrieving collages' });
+    return res.status(500).json({ error: 'Internal server error while retrieving collages' });
   }
 };
 
 // Create or update a collage
 const upsertCollage = async (req, res) => {
-  const { _id, collageName, images } = req.body;
-
   if (!req.session.account || !req.session.account._id) {
     return res.status(401).json({ error: 'Not authorized' });
   }
+
+  const { _id, collageName, images } = req.body;
 
   if (!collageName || !images || !Array.isArray(images)) {
     return res.status(400).json({ error: 'Collage name and images are required' });
@@ -34,54 +30,56 @@ const upsertCollage = async (req, res) => {
   try {
     let collage;
     if (_id) {
-      // update existing collage
+      // Update existing collage
       collage = await Collage.findOneAndUpdate(
         { _id, owner: req.session.account._id },
         { collageName, images },
-        { new: true } // return updated document
+        { new: true }
       );
+
       if (!collage) {
         return res.status(404).json({ error: 'Collage not found' });
       }
+
+      return res.status(200).json({ success: true, collage });
     } else {
-      // create new collage
+      // Create new collage
       collage = new Collage({
         collageName,
         images,
         owner: req.session.account._id,
       });
       await collage.save();
+      return res.status(201).json({ success: true, collage });
     }
-
-    return res.json({ success: true, collage });
   } catch (err) {
     console.error('Error saving collage:', err);
     if (err.code === 11000) {
-      return res.status(400).json({ error: 'Collage with this name already exists' });
+      return res.status(409).json({ error: 'Collage with this name already exists' }); // 409 Conflict
     }
-    return res.status(500).json({ error: 'Error saving collage' });
+    return res.status(500).json({ error: 'Internal server error while saving collage' });
   }
 };
 
-// delete a collage by ID
+// Delete a collage by ID
 const deleteCollage = async (req, res) => {
+  if (!req.session.account || !req.session.account._id) {
+    return res.status(401).json({ error: 'Not authorized' });
+  }
+
+  const { id } = req.params;
+
   try {
-    const { id } = req.params;
-
-    if (!req.session.account || !req.session.account._id) {
-      return res.status(401).json({ error: 'Not authorized' });
-    }
-
     const result = await Collage.deleteOne({ _id: id, owner: req.session.account._id });
 
     if (result.deletedCount === 0) {
       return res.status(404).json({ error: 'Collage not found' });
     }
 
-    return res.json({ success: true });
+    return res.sendStatus(204); // 204 no content
   } catch (err) {
     console.error('Error deleting collage:', err);
-    return res.status(500).json({ error: 'Error deleting collage' });
+    return res.status(500).json({ error: 'Internal server error while deleting collage' });
   }
 };
 
