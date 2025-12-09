@@ -4,11 +4,16 @@
   "description": "A program that allows users to create collages online",
   "main": "./server/app.js",
   "scripts": {
-    "start": "node server/app.js",
-    "server": "node server/app.js",
+    "webpack": "webpack",
+    "webpackWatch": "webpack watch",
+    "nodemon": "nodemon -e js,html,css --watch ./server --watch ./hosted ./server/app.js",
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "node ./server/app.js",
     "client": "npm start --prefix client",
-    "heroku-postbuild": "npm install --prefix client && npm run build --prefix client",
-    "test": "echo \"Tests complete\""
+    "pretest": "eslint ./server --fix",
+    "test": "echo \"Tests complete\"",
+
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix client && npm run build --prefix client"
   },
   "keywords": [
     "Node",
@@ -41,10 +46,18 @@
     "@babel/preset-env": "^7.28.5",
     "@babel/preset-react": "^7.28.5",
     "babel-loader": "^10.0.0",
+    "concurrently": "^8.2.2",
     "cross-env": "^10.1.0",
+    "css-loader": "^7.1.2",
+    "dotenv-webpack": "^8.1.1",
     "eslint": "^8.57.1",
+    "eslint-config-airbnb": "^19.0.4",
+    "eslint-plugin-import": "^2.32.0",
+    "file-loader": "^6.2.0",
+    "html-webpack-plugin": "^5.6.5",
     "nodemon": "^3.1.10",
     "rimraf": "^6.1.2",
+    "style-loader": "^4.0.0",
     "webpack": "^5.103.0",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
