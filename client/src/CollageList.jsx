@@ -83,7 +83,7 @@ function CollageList({ onLoadCollage }) {
               onClick={() => handleDeleteCollage(collage._id)}
               style={{ marginLeft: '5px', cursor: 'pointer' }}
             >
-              🗑
+              Delete
             </button>
           </li>
         ))}

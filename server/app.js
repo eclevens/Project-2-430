@@ -9,6 +9,7 @@ const cors = require('cors');
 const mongoose = require('mongoose');
 const redis = require('redis');
 const { RedisStore } = require('connect-redis');
+const { engine } = require('express-handlebars'); // fixed import
 
 const router = require('./router.js');
 
@@ -47,15 +48,27 @@ app.use(session({
   },
 }));
 
-// Static assets if needed
+// Static assets
 app.use('/assets', express.static(path.resolve(`${__dirname}/../hosted`)));
+
+// Set Handlebars as view engine
+app.engine('handlebars', engine()); // <-- use engine() here
+app.set('view engine', 'handlebars');
+app.set('views', path.join(__dirname, 'views')); // points to /server/views
 
 // API routes
 router(app);
 
+// Handlebars route for /about
+app.get('/about', (req, res) => {
+  res.render('about', { layout: false });
+});
+
 // React production build serving
 if (process.env.NODE_ENV === 'production') {
   app.use(express.static(path.join(__dirname, '../client/build')));
+
+  // react fallback
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
   });
@@ -65,7 +78,7 @@ if (process.env.NODE_ENV === 'production') {
 const startServer = async () => {
   try {
     // MongoDB
-    const dbURI = process.env.MONGODB_URI || 'mongodb://localhost/DomoMaker'; // mongodb is called domo but i am not using domo code. I had so many issues I resued the domo here but there is no domo code.
+    const dbURI = process.env.MONGODB_URI || 'mongodb://localhost/DomoMaker'; // still called domo but does not have domo code, it's just called domo
     await mongoose.connect(dbURI);
     console.log('MongoDB connected');
 
@@ -73,7 +86,7 @@ const startServer = async () => {
     await redisClient.connect();
     console.log('Redis connected');
 
-    // Start Express server
+    // Express server
     app.listen(PORT, () => {
       console.log(`Server listening on port ${PORT}`);
     });
